@@ -40,62 +40,33 @@ app.post('/clientes', (req, res) => {
   });
 });
 
+app.delete('/clientes/:id', (req, res) => {
+  const id = req.params.id;
+
+  connection.query('DELETE FROM clientes WHERE id = ?', [id], (error, results) => {
+    if (error) {
+      throw error;
+    }
+
+    res.send(`Cliente com id ${id} removido com sucesso!`);
+  });
+});
+
+app.put('/clientes/:id', (req, res) => {
+  const id = req.params.id;
+  const { nome, cpf, senha, telefone, email } = req.body;
+
+  connection.query('UPDATE clientes SET nome = ?, cpf = ?, senha = ?, telefone = ?, email = ? WHERE id = ?', [nome, cpf, senha, telefone, email, id], (error, results) => {
+    if (error) {
+      throw error;
+    }
+
+    res.send(`Cliente com id ${id} atualizado com sucesso!`);
+  });
+});
+
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
 
-
-
-/*
-const express = require("express"); // importa o express
-
-const server = express(); // cria uma variável chamada server que chama a função express
-
-server.use(express.json()); // faz com que o express entenda JSON
-const clientes = [];
-
-server.get("/clientes", (req, res) => {
-  console.log("teste");
-  return res.json(clientes);
-}); // Cria a rota /teste com o método GET, o console.log retornará no terminal ‘teste’ caso tenha executado com sucesso.
-
-
-server.post("/clientes", (req, res) => {
-  const { name } = req.body; // assim esperamos buscar o name informado dentro do body da requisição
-  clientes.push(name);
-
-  return res.json(clientes); // retorna a informação da variável geeks
-});
-
-server.put('/clientes/:index', (req, res) => {
-    const { index } = req.params; // recupera o index com os dados
-    const { name } = req.body;
-    
-    clientes[index] = name; // sobrepõe o index obtido na rota de acordo com o novo valor
-    
-    return res.json(clientes);
-    })
-
-
-    server.delete('/clientes/:index', (req, res) => {
-        const { index } = req.params; // recupera o index com os dados
-        
-        clientes.splice(index, 1); // percorre o vetor até o index selecionado e deleta uma posição no array
-        
-        return res.send();
-        });
-
-
-server.listen(3333); // faz com que o servidor seja executado na porta 3000 do seu localhost:3000
-
-/*
-const express = require('express')
-
-const port = 3333
-const app = express()
-app.get('/', (req, res) => {
-    res.send('Hello world!')
-})
-app.listen(port, () => console.log(`App running on http://localhost:${port}`))
-*/
