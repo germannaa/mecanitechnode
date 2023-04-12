@@ -17,7 +17,7 @@ app.use(function(req, res, next) {
   next();
 });
 
-
+//CLIENTES
 
 app.get('/clientes', (req, res) => {
   connection.query('SELECT * FROM clientes', (error, results) => {
@@ -62,6 +62,61 @@ app.put('/clientes/:id', (req, res) => {
     }
 
     res.send(`Cliente com id ${id} atualizado com sucesso!`);
+  });
+});
+
+
+//VEICULOS
+
+// GET - listar todos os veículos, e associar com o nome do Cliente pelo CPF
+app.get('/veiculos', (req, res) => {
+  connection.query('SELECT veículos.*, clientes.nome AS nome_cliente FROM veículos JOIN clientes ON veículos.cpf_cliente = clientes.cpf', (error, results) => {
+    if (error) {
+      throw error;
+    }
+    res.send(results);
+  });
+});
+
+
+// POST - criar novo veículo associando ao cpf do cliente
+app.post('/veiculos', (req, res) => {
+  const { placa, marca, modelo, ano, kilometragem, cpf_cliente } = req.body;
+
+  connection.query('INSERT INTO veículos (placa, marca, modelo, ano, kilometragem, cpf_cliente) VALUES (?, ?, ?, ?, ?, ?)', [placa, marca, modelo, ano, kilometragem, cpf_cliente], (error, results) => {
+    if (error) {
+      throw error;
+    }
+
+    res.send(`Veículo ${placa} adicionado com sucesso!`);
+  });
+});
+
+// DELETE - remover veículo pela placa 
+
+app.delete('/veiculos/:placa', (req, res) => {
+  const placa = req.params.placa;
+
+  connection.query('DELETE FROM veículos WHERE placa = ?', [placa], (error, results) => {
+    if (error) {
+      throw error;
+    }
+
+    res.send(`Veículo com placa ${placa} removido com sucesso!`);
+  });
+});
+
+// PUT - atualizar veículo pela placa
+app.put('/veiculos/:placa', (req, res) => {
+  const id = req.params.placa;
+  const { placa, marca, modelo, ano, kilometragem, cpf_cliente } = req.body;
+
+  connection.query('UPDATE veículos SET placa = ?, marca = ?, modelo = ?, ano = ?, kilometragem = ?, cpf_cliente = ? WHERE placa = ?', [placa, marca, modelo, ano, kilometragem, cpf_cliente, id], (error, results) => {
+    if (error) {
+      throw error;
+    }
+
+    res.send(`Veículo com placa ${placa} atualizado com sucesso!`);
   });
 });
 
