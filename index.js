@@ -147,7 +147,6 @@ app.put("/veiculos/:placa", (req, res) => {
   );
 });
 
-
 // SERVICOS
 
 // GET - listar todos os serviços
@@ -205,6 +204,83 @@ app.put("/servicos/:id", (req, res) => {
         throw error;
       }
       res.send(`Serviço com id ${id} atualizado com sucesso!`);
+    }
+  );
+});
+
+// FUNCIONARIOS
+
+// GET - listar todos os funcionários
+app.get("/funcionarios", (req, res) => {
+  connection.query("SELECT * FROM funcionario", (error, results) => {
+    if (error) {
+      throw error;
+    }
+    res.send(results);
+  });
+});
+
+// GET - buscar funcionário pelo id_funcionario
+app.get("/funcionarios/:id", (req, res) => {
+  const id = req.params.id;
+
+  connection.query(
+    "SELECT * FROM funcionario WHERE id_funcionario = ?",
+    [id],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.send(results);
+    }
+  );
+});
+
+// POST - criar novo funcionário
+app.post("/funcionarios", (req, res) => {
+  const { nome, cargo, data_admissao, salario, cpf } = req.body;
+
+  connection.query(
+    "INSERT INTO funcionario (nome, cargo, data_admissao, salario, cpf) VALUES (?, ?, ?, ?, ?)",
+    [nome, cargo, data_admissao, salario, cpf],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.send(`Funcionário ${nome} adicionado com sucesso!`);
+    }
+  );
+});
+
+// DELETE - remover funcionário pelo id_funcionario
+app.delete("/funcionarios/:id", (req, res) => {
+  const id = req.params.id;
+
+  connection.query(
+    "DELETE FROM funcionario WHERE id_funcionario = ?",
+    [id],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.send(`Funcionário com id ${id} removido com sucesso!`);
+    }
+  );
+});
+
+// PUT - atualizar funcionário pelo id_funcionario
+app.put("/funcionarios/:id", (req, res) => {
+  const id = req.params.id;
+  const { nome, cargo, data_admissao, salario, cpf } = req.body;
+
+  connection.query(
+    "UPDATE funcionario SET nome = ?, cargo = ?, data_admissao = ?, salario = ?, cpf = ? WHERE id_funcionario = ?",
+    [nome, cargo, data_admissao, salario, cpf, id],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.send(`Funcionário com id ${id} atualizado com sucesso!`);
     }
   );
 });
