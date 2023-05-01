@@ -94,6 +94,25 @@ app.get("/veiculos", (req, res) => {
   );
 });
 
+//Consultar placas dos veículos daquele cpf
+app.get("/veiculos/:cpf", (req, res) => {
+  const { cpf } = req.params;
+  connection.query(
+    "SELECT placa FROM veículos WHERE cpf_cliente = ?",
+    [cpf],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      const placas = results.map((item) => item.placa);
+      res.send(placas);
+    }
+  );
+});
+
+
+
+
 // POST - criar novo veículo associando ao cpf do cliente
 app.post("/veiculos", (req, res) => {
   const { placa, marca, modelo, ano, kilometragem, cpf_cliente } = req.body;
@@ -281,6 +300,143 @@ app.put("/funcionarios/:id", (req, res) => {
         throw error;
       }
       res.send(`Funcionário com id ${id} atualizado com sucesso!`);
+    }
+  );
+});
+
+//ORDENS DE SERVICO
+
+// GET - listar todas as ordens de serviço
+app.get("/ordensdeservico", (req, res) => {
+  connection.query(
+    "SELECT o.id_os,o.cpf_cliente,(SELECT nome FROM clientes WHERE cpf = o.cpf_cliente) AS nome_cliente, o.placa_veiculo, (SELECT marca FROM veículos WHERE placa = o.placa_veiculo) AS marca_veiculo, (SELECT modelo FROM veículos WHERE placa = o.placa_veiculo) AS modelo_veiculo, o.id_funcionario, (SELECT nome FROM funcionario WHERE id_funcionario = o.id_funcionario) AS nome_funcionario, o.data_inicio, o.data_termino, o.valor_total, o.status, (SELECT GROUP_CONCAT(s.nome_servico SEPARATOR ', ') FROM os_servicos os INNER JOIN servicos s ON os.id_servico = s.id_servico WHERE os.id_os = o.id_os) AS servicos_realizados FROM ordensdeservico o",
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.send(results);
+    }
+  );
+});
+
+app.get("/ordemdeservico", (req, res) => {
+  connection.query("SELECT * FROM ordensdeservico", (error, results) => {
+    if (error) {
+      throw error;
+    }
+    res.send(results);
+  });
+});
+
+// GET - buscar ordem de serviço pelo id_os
+app.get("/ordensdeservico/:id", (req, res) => {
+  const id = req.params.id;
+
+  connection.query(
+    "SELECT * FROM ordensdeservico WHERE id_os = ?",
+    [id],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.send(results);
+    }
+  );
+});
+
+// POST - criar nova ordem de serviço
+app.post("/ordensdeservico", (req, res) => {
+  const {
+    cpf_cliente,
+    placa_veiculo,
+    id_funcionario,
+    data_inicio,
+    data_termino,
+    valor_total,
+    status,
+    servicos,
+  } = req.body;
+
+  connection.query(
+    "INSERT INTO ordensdeservico (cpf_cliente, placa_veiculo, id_funcionario, data_inicio, data_termino, valor_total, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [
+      cpf_cliente,
+      placa_veiculo,
+      id_funcionario,
+      data_inicio,
+      data_termino,
+      valor_total,
+      status,
+    ],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+
+      const id_os = results.insertId;
+
+      const values = servicos.map((id_servico) => [id_os, id_servico]);
+
+      connection.query(
+        "INSERT INTO os_servicos (id_os, id_servico) VALUES ?",
+        [values],
+        (error, results) => {
+          if (error) {
+            throw error;
+          }
+          res.send("Ordem de serviço adicionada com sucesso!");
+        }
+      );
+    }
+  );
+});
+
+// DELETE - remover ordem de serviço pelo id_os
+app.delete("/ordensdeservico/:id", (req, res) => {
+  const id = req.params.id;
+
+  connection.query(
+    "DELETE FROM ordensdeservico WHERE id_os = ?",
+    [id],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.send(`Ordem de serviço com id ${id} removida com sucesso!`);
+    }
+  );
+});
+
+// PUT - atualizar ordem de serviço pelo id_os
+app.put("/ordensdeservico/:id", (req, res) => {
+  const id = req.params.id;
+  const {
+    cpf_cliente,
+    placa_veiculo,
+    id_funcionario,
+    data_inicio,
+    data_termino,
+    valor_total,
+    status,
+  } = req.body;
+
+  connection.query(
+    "UPDATE ordensdeservico SET cpf_cliente = ?, placa_veiculo = ?, id_funcionario = ?, data_inicio = ?, data_termino = ?, valor_total = ?, status = ? WHERE id_os = ?",
+    [
+      cpf_cliente,
+      placa_veiculo,
+      id_funcionario,
+      data_inicio,
+      data_termino,
+      valor_total,
+      status,
+      id,
+    ],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.send(`Ordem de serviço com id ${id} atualizada com sucesso!`);
     }
   );
 });
