@@ -376,6 +376,7 @@ app.post("/ordensdeservico", (req, res) => {
       const id_os = results.insertId;
 
       const values = servicos.map((id_servico) => [id_os, id_servico]);
+      
 
       connection.query(
         "INSERT INTO os_servicos (id_os, id_servico) VALUES ?",
@@ -391,7 +392,7 @@ app.post("/ordensdeservico", (req, res) => {
   );
 });
 
-// DELETE - remover ordem de serviço pelo id_os
+// DELETE - remover ordem de serviço pelo id_os, removendo em cascata 
 app.delete("/ordensdeservico/:id", (req, res) => {
   const id = req.params.id;
 

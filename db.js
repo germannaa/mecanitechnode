@@ -12,14 +12,4 @@ const connection = mysql.createConnection({
 
 });
 
-
-/*
-connection.query('CREATE DATABASE mecanitech2', function (err, result) {
-  if (err) throw err;
-  console.log("Banco de dados criado com sucesso!");
-});
-
-connection.end();
-
-*/
 module.exports = connection;
